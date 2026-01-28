@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kecocokan BONEDO Kamu</title>
+    <style>
+        /* Reset dasar untuk konsistensi */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Background utama: langit sore dengan awan lembut */
+        body {
+            background: linear-gradient(to bottom, #87CEEB 0%, #FFB6C1 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Container utama untuk halaman */
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        /* Elemen rumah cozy sederhana menggunakan CSS */
+        .house {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 60px;
+            background: #F5DEB3;
+            border-radius: 10px 10px 0 0;
+        }
+        .house::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 20px solid #F5DEB3;
+        }
+        .house::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #87CEEB;
+            border-radius: 50%;
+        }
+
+        /* Judul dan teks */
+        h1 {
+            font-size: 24px;
+            color: #4B0082;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Tombol */
+        button {
+            background: linear-gradient(45deg, #87CEEB, #FFB6C1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Progress bar sederhana */
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #87CEEB, #FFB6C1);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Opsi jawaban */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #FFB6C1;
+            border-radius: 15px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .option:hover {
+            background: #FFB6C1;
+            color: white;
+        }
+
+        /* Halaman hasil */
+        .result {
+            margin-top: 20px;
+        }
+        .result h2 {
+            font-size: 20px;
+            color: #4B0082;
+        }
+        .result p {
+            margin: 10px 0;
+        }
+        .vibe {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* Credit di bawah */
+        .credit {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="house"></div>
+        
+        <!-- Halaman Home -->
+        <div id="home" class="page">
+            <h1>Kecocokan BONEDO Kamu</h1>
+            <p>Yuk, temukan member BOYNEXTDOOR yang vibe-nya cocok sama kamu! Jawab 5 pertanyaan simpel dan lihat hasilnya. Ini cuma buat fun, ya!</p>
+            <button onclick="startQuiz()">Mulai Kuis</button>
+        </div>
+
+        <!-- Halaman Kuis -->
+        <div id="quiz" class="page" style="display: none;">
+            <h1>Kuis Kepribadian</h1>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p id="question"></p>
+            <div class="options" id="options"></div>
+        </div>
+
+        <!-- Halaman Hasil -->
+        <div id="result" class="page" style="display: none;">
+            <div class="result">
+                <h2 id="result-title"></h2>
+                <p id="result-desc"></p>
+                <p class="vibe" id="result-vibe"></p>
+                <p>Hasil berdasarkan vibe kepribadian. Ini adalah fanmade project dan tidak bersifat romantis.</p>
+            </div>
+            <button onclick="restartQuiz()">Ulangi Kuis</button>
+            <div class="credit">by @gnextdoor_id</div>
+        </div>
+    </div>
+
+    <script>
+        // Data pertanyaan: setiap opsi memberikan poin ke member tertentu
+        const questions = [
+            {
+                question: "Kalau lagi santai di rumah, apa yang kamu suka lakuin?",
+                options: [
+                    { text: "Nonton film sambil ngobrol sama temen", points: { JAEHYUN: 1 } },
+                    { text: "Baca buku atau mikir tentang ide kreatif", points: { TAESAN: 1 } },
+                    { text: "Olahraga atau latihan rutin", points: { RIWOO: 1 } },
+                    { text: "Duduk tenang sambil minum teh hangat", points: { SUNGHO: 1 } }
+                ]
+            },
+            {
+                question: "Di grup temen, kamu biasanya jadi yang seperti apa?",
+                options: [
+                    { text: "Yang bikin suasana jadi ceria dan rame", points: { JAEHYUN: 1 } },
+                    { text: "Yang pendiam tapi selalu perhatian ke orang lain", points: { SUNGHO: 1 } },
+                    { text: "Yang suka eksplor hal baru dan bertanya-tanya", points: { WOONHAK: 1 } },
+                    { text: "Yang reflektif dan suka diskusi dalam", points: { LEEHAN: 1 } }
+                ]
+            },
+            {
+                question: "Kalau ada tantangan baru, reaksi kamu gimana?",
+                options: [
+                    { text: "Langsung semangat dan coba deh!", points: { WOONHAK: 1 } },
+                    { text: "Rencana dulu dengan fokus dan tekad", points: { RIWOO: 1 } },
+                    { text: "Ekspresikan lewat cara unik atau seni", points: { TAESAN: 1 } },
+                    { text: "Tenang aja, cari cara yang nyaman", points: { LEEHAN: 1 } }
+                ]
+            },
+            {
+                question: "Vibe favorit kamu di hari libur?",
+                options: [
+                    { text: "Hangat dan penuh perhatian ke keluarga", points: { SUNGHO: 1 } },
+                    { text: "Ceria dan sosial, ketemu banyak orang", points: { JAEHYUN: 1 } },
+                    { text: "Kreatif dan ekspresif, bikin sesuatu", points: { TAESAN: 1 } },
+                    { text: "Damai dan reflektif, istirahat total", points: { LEEHAN: 1 } }
+                ]
+            },
+            {
+                question: "Kalau lagi stress, kamu biasanya gimana?",
+                options: [
+                    { text: "Olahraga atau fokus ke tujuan", points: { RIWOO: 1 } },
+                    { text: "Bikin suasana jadi fun dan energik", points: { WOONHAK: 1 } },
+                    { text: "Curhat atau ekspresikan emosi", points: { TAESAN: 1 } },
+                    { text: "Cari kenyamanan dan tenang", points: { SUNGHO: 1 } }
+                ]
+            }
+        ];
+
+        // Deskripsi hasil per member
+        const results = {
+            SUNGHO: {
+                desc: "Tenang, hangat, dan penuh perhatian. Kamu tipe yang observatif dan membawa rasa aman di sekitarmu.",
+                vibe: "Vibe: calm • warm • reliable"
+            },
+            RIWOO: {
+                desc: "Disiplin, fokus, dan penuh tekad. Kamu suka berkembang dan menunjukkan kekuatan lewat tindakan.",
+                vibe: "Vibe: sharp • dedicated • confident"
+            },
+            JAEHYUN: {
+                desc: "Ceria, komunikatif, dan mudah bergaul. Kamu membawa energi positif dan suasana yang hidup.",
+                vibe: "Vibe: bright • expressive • social"
+            },
+            TAESAN: {
+                desc: "Kreatif, ekspresif, dan punya kedalaman emosi. Kamu nyaman mengekspresikan diri dengan cara unik.",
+                vibe: "Vibe: creative • deep • expressive"
+            },
+            LEEHAN: {
+                desc: "Lembut, tenang, dan reflektif. Kamu menghargai kenyamanan emosional dan suasana damai.",
+                vibe: "Vibe: gentle • cozy • reflective"
+            },
+            WOONHAK: {
+                desc: "Fresh, ceria, dan penuh rasa ingin tahu. Kamu membawa energi muda dan semangat belajar.",
+                vibe: "Vibe: playful • fresh • energetic"
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = { SUNGHO: 0, RIWOO: 0, JAEHYUN: 0, TAESAN: 0, LEEHAN: 0, WOONHAK: 0 };
+
+        // Fungsi untuk mulai kuis
+        function startQuiz() {
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            showQuestion();
+        }
+
+        // Fungsi untuk tampilkan pertanyaan
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question').textContent = q.question;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            q.options.forEach(option => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.textContent = option.text;
+                btn.onclick = () => selectOption(option.points);
+                optionsDiv.appendChild(btn);
+            });
+            updateProgress();
+        }
+
+        // Fungsi untuk update progress
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // Fungsi untuk pilih opsi
+        function selectOption(points) {
+            for (const member in points) {
+                scores[member] += points[member];
+            }
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        // Fungsi untuk tampilkan hasil
+        function showResult() {
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            const winner = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            document.getElementById('result-title').textContent = `Kamu cocok dengan ${winner}`;
+            document.getElementById('result-desc').textContent = results[winner].desc;
+            document.getElementById('result-vibe').textContent = results[winner].vibe;
+        }
+
+        // Fungsi untuk ulangi kuis
+        function restartQuiz() {
+            currentQuestion = 0;
+            scores = { SUNGHO: 0, RIWOO: 0, JAEHYUN: 0, TAESAN: 0, LEEHAN: 0, WOONHAK: 0 };
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('home').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
